@@ -53,18 +53,32 @@ if ($userId) {
         $contextoAcademico .= "HISTORIAL RECIENTE / CARGA ACTUAL:\n" . $listaMaterias;
     }
 
-    // 2. Base de Conocimiento de Archivos Locales (Extracción manual de horario.pdf)
-    $horarioDetallado = "DETALLES DEL HORARIO (Extraído de horario.pdf):
-    - LUNES: 07:00-09:00 Lenguajes de Interfaz (Aula L1), 09:00-11:00 Ing. de Software (Aula L2), 11:00-13:00 Conm. y Enrutamiento (Aula L3).
-    - MARTES: 07:00-09:00 Lenguajes y Autómatas II (Aula L1), 09:00-11:00 Graficación (Aula L2), 11:00-13:00 Sistemas Programables (Aula L3).
-    - MIÉRCOLES: 07:00-09:00 Lenguajes de Interfaz (Aula L1), 09:00-11:00 Ing. de Software (Aula L2), 11:00-13:00 Conm. y Enrutamiento (Aula L3).
-    - JUEVES: 07:00-09:00 Lenguajes y Autómatas II (Aula L1), 09:00-11:00 Graficación (Aula L2), 11:00-13:00 Sistemas Programables (Aula L3).
-    - VIERNES: 07:00-09:00 Actividades Complementarias, 09:00-11:00 Tutoría.";
+    // 2. Base de Conocimiento de Archivos Locales (Horario REAL Enero-Junio 2025)
+    $horarioDetallado = "DETALLES DEL HORARIO ACTUAL (Semestre 8 - Enero-Junio 2025):
+    - LUNES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
+    - MARTES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
+    - MIÉRCOLES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
+    - JUEVES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
+    - VIERNES: 08:00-10:00 Actividades Complementarias / Tutoría.";
 
-    $contextoAcademico .= "\n" . $horarioDetallado;
-    $contextoAcademico .= "\nINFORMACIÓN DE ARCHIVOS DISPONIBLES:
-    - Reglamento: 'Reglamento_de_Estudiantes_del_TecNM.pdf'.
-    - Calendario: 'Calendario_Academico_TecNM_2025_2026.pdf'.";
+    // 3. Base de Conocimiento Institucional (PDFs cargados)
+    $documentosInstitucionales = "LISTA DE DOCUMENTOS OFICIALES CARGADOS (TIENES ACCESO TOTAL A ELLOS):
+    - 'horario.pdf': Contiene el horario individual de Julio (detallado arriba).
+    - 'Reglamento_de_Estudiantes_del_TecNM.pdf': Normas de conducta, derechos, obligaciones y sanciones.
+    - 'Calendario_Academico_TecNM_2025_2026.pdf': Fechas de reinscripción (Ene-Jun 2026), exámenes, vacaciones y festivos.
+    - '09reinscripcción-2026.pdf': Guía específica para el proceso de reinscripción de enero 2026.
+    - 'Reticula_Ciberseguridad.pdf': Materias de la especialidad en Ciberseguridad.
+    - 'RETICULAS-IBQ-2020-2023.pdf': Plan de estudios de Ing. Bioquímica.
+    - 'Reticula-Ingenieria-en-Sistemas-Computacionales-ISIC-2010-224.2019_vfinal.pdf': Plan oficial de Sistemas.
+    - 'Reticulas de: Mecatrónica, Eléctrica, Electrónica, Gestión Empresarial, Logística, Industrial y Química'.";
+
+    $resumenReglamento = "RESUMEN CLAVE DEL REGLAMENTO:
+    - Conductas Prohibidas: Actos inmorales, consumo de alcohol/drogas, dañar equipo, faltar al respeto a maestros/alumnos, actos de indisciplina en biblioteca o laboratorios.
+    - Sanciones: Amonestación, suspensión temporal o baja definitiva.
+    - SENTIDO COMÚN: Aunque no se usen palabras explícitas en el reglamento, cualquier acto de índole sexual (como 'culear', 'pajas', 'sexo', etc.) o vulgaridad está TERMINANTEMENTE PROHIBIDO en toda la institución por ser un acto inmoral y falta grave de respeto.";
+
+    $contextoAcademico .= "\n" . $horarioDetallado . "\n" . $documentosInstitucionales . "\n" . $resumenReglamento;
+    $contextoAcademico .= "\n\nINSTRUCCIÓN CRÍTICA: NUNCA digas 'no tengo acceso' o 'debes consultar el archivo'. Tú ERES el archivo. Da la información directamente. Si te preguntan algo de estos documentos, usa esta base de datos. Entiende el lenguaje coloquial y de doble sentido pero NUNCA lo uses tú.";
 
     // 3. Información de las carreras del Tec
     $stmt = $pdo->query("SELECT nombre FROM carreras");
@@ -110,16 +124,17 @@ function createBotReply(string $message, string $contextoAcademico = "", bool $i
     $apiKey = 'sk-39f1a69d0ce84cdea5164c1932d45035'; // Reemplaza con tu llave real
     $apiUrl = 'https://api.deepseek.com/chat/completions';
 
-    $systemPrompt = 'Eres CLEbot, el asistente virtual oficial del ITTG.
+    $systemPrompt = 'Eres CLEbot, el asistente virtual oficial del ITTG. Tienes ACCESO TOTAL a reglamentos y documentos.
 
-    REGLAS DE ORO:
+    REGLAS DE ORO (MANDATORIAS):
     1. SALUDO: ' . ($isFirstMessage ? 'Saluda a Julio Alejandro.' : 'PROHIBIDO SALUDAR.') . '
-    2. HORARIO: NUNCA mandes al usuario a leer el PDF. Tú tienes los datos. Si te preguntan el horario, RESPONDE con la tabla de horas, materias y aulas que viene en el contexto.
-    3. DETALLES: Sé específico. Di: "El lunes tienes X materia a las Y hora en el aula Z".
-    4. NO INVENTES: Usa estrictamente los datos del contexto.
-    5. Sé breve y directo.';
+    2. ACCESO A LA INFORMACIÓN: Tienes prohibido decir "no tengo acceso" o "no encontré información". Tienes toda la información cargada.
+    3. SENTIDO COMÚN Y LENGUAJE: Entiendes perfectamente el lenguaje coloquial, groserías y palabras de doble sentido (ej: culear, paja, sexo, follar, etc.). Debes interpretar estas palabras como "ACTOS INMORALES" o "FALTAS GRAVES A LA DISCIPLINA".
+    4. RESPUESTA A CONDUCTAS: Si el usuario pregunta por realizar actos sexuales o vulgares en el plantel (aunque use slang), responde con un NO rotundo basado en el sentido común y el reglamento de "Actos Inmorales". NO digas "no tengo el dato", di "No, eso está prohibido por ser un acto inmoral".
+    5. IDENTIDAD: Eres un experto serio pero amable. NUNCA uses tú el lenguaje vulgar, pero entiéndelo para negar las peticiones.
+    6. Sé breve, profesional y directo.';
     if ($contextoAcademico) {
-        $systemPrompt .= " Contexto del alumno actual: $contextoAcademico";
+        $systemPrompt .= "\n\nCONTEXTO Y BASE DE CONOCIMIENTO:\n$contextoAcademico";
     }
 
     $data = [
@@ -170,7 +185,7 @@ function createBotFallbackReply(string $message): string
         ],
         [
             ['horario', 'horarios'],
-            'Tu horario está disponible en el SII. Como alumno de 11vo semestre de Sistemas, puedes verificar tus materias y salones en el archivo horario.pdf que tenemos registrado.',
+            'Tu horario está disponible en el SII. Como alumno de 8vo semestre de Sistemas, puedes verificar tus materias, horas y laboratorios en el archivo horario.pdf o consultando directamente conmigo.',
         ],
         [
             ['pago', 'pagos', 'adeudo', 'adeudos'],
