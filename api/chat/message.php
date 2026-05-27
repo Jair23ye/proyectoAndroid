@@ -54,18 +54,18 @@ if ($userId) {
     }
 
     // 2. Base de Conocimiento de Archivos Locales (Horario REAL Enero-Junio 2026)
-    $horarioDetallado = "DETALLES DEL HORARIO ACTUAL (Semestre 10 - Enero-Junio 2026):
-    - LUNES: 07:00-09:00 Residencia Profesional (Empresa), 11:00-13:00 Actividades de Seguimiento.
-    - MARTES: 09:00-11:00 Revisión de Reportes Técnicos.
-    - MIÉRCOLES: 07:00-09:00 Residencia Profesional (Empresa).
-    - JUEVES: 09:00-11:00 Revisión de Reportes Técnicos.
-    - VIERNES: 08:00-10:00 Evaluación Semanal.";
+    $horarioDetallado = "DETALLES DEL HORARIO ACTUAL (Semestre 8 - Enero-Junio 2026):
+    - LUNES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
+    - MARTES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
+    - MIÉRCOLES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
+    - JUEVES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
+    - VIERNES: 08:00-10:00 Actividades Complementarias / Tutoría.";
 
     // 3. Base de Conocimiento Institucional (PDFs cargados)
     $documentosInstitucionales = "LISTA DE DOCUMENTOS OFICIALES CARGADOS (TIENES ACCESO TOTAL A ELLOS):
     - 'horario.pdf': Contiene el horario individual de Julio (detallado arriba).
     - 'Reglamento_de_Estudiantes_del_TecNM.pdf': Normas de conducta, derechos, obligaciones y sanciones.
-    - 'Calendario_Academico_TecNM_2025_2026.pdf': Fechas de reinscripción, exámenes, vacaciones y festivos. Hoy es 27 de Mayo de 2026. Estamos en la recta final del semestre Enero-Junio 2026.
+    - 'Calendario_Academico_TecNM_2025_2026.pdf': Fechas de reinscripción, exámenes, vacaciones y festivos.
     - '09reinscripcción-2026.pdf': Guía para el proceso de reinscripción.";
 
     $resumenReglamento = "RESUMEN CLAVE DEL REGLAMENTO:
@@ -124,10 +124,10 @@ function createBotReply(string $message, string $contextoAcademico = "", bool $i
 
     REGLAS DE ORO (MANDATORIAS):
     1. SALUDO: ' . ($isFirstMessage ? 'Saluda a Julio Alejandro.' : 'PROHIBIDO SALUDAR.') . '
-    2. TIEMPO ACTUAL: Estamos en el semestre ENERO-JUNIO 2026. Si te preguntan por el horario, usa los datos de 2026 proporcionados en el contexto (Residencias Profesionales).
-    3. ACCESO A LA INFORMACIÓN: Tienes prohibido decir "no tengo acceso" o "no encontré información". Tienes toda la información cargada.
-    4. SENTIDO COMÚN Y LENGUAJE: Entiendes perfectamente el lenguaje coloquial, groserías y palabras de doble sentido.
-    5. RESPUESTA A CONDUCTAS: Si el usuario pregunta por realizar actos sexuales o vulgares en el plantel, responde con un NO rotundo basado en el reglamento de "Actos Inmorales".
+    2. TIEMPO ACTUAL: Hoy es 27 de Mayo de 2026.
+    3. HORARIO: El horario actual de Julio es el del semestre ENERO-JUNIO 2026 (8vo semestre). Muestra las materias: iOS, AI, Android, Taller Inv II, Desarrollo Web Avanzado y E-Business. NO inventes residencias ni hables de 2025.
+    4. ACCESO A LA INFORMACIÓN: Tienes prohibido decir "no tengo acceso" o "no encontré información". Tienes toda la información cargada.
+    5. SENTIDO COMÚN Y LENGUAJE: Entiendes perfectamente el lenguaje coloquial y de doble sentido. Responde con un NO rotundo a vulgaridades basándote en el reglamento de "Actos Inmorales".
     6. IDENTIDAD: Eres un experto serio pero amable. NUNCA uses tú el lenguaje vulgar.
     7. Sé breve, profesional y directo.';
     if ($contextoAcademico) {
