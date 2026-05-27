@@ -1,8 +1,10 @@
-package com.example.cle_bot.ui.screens
+package com.example.cle_bot.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
@@ -19,22 +21,63 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import com.example.cle_bot.R
 import androidx.compose.foundation.Image
+import com.example.cle_bot.data.ApiResult
+import com.example.cle_bot.data.CleBotRepository
+import com.example.cle_bot.data.UserDto
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SupportScreen(onBack: () -> Unit) {
+fun SupportScreen(
+    repository: CleBotRepository,
+    user: UserDto?,
+    onBack: () -> Unit
+) {
     val blue = Color(0xFF3D5BF5)
-    var nombre by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    var nombre by remember(user?.name) { mutableStateOf(user?.name.orEmpty()) }
+    var email by remember(user?.email) { mutableStateOf(user?.email.orEmpty()) }
     var categoria by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var feedback by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
     val categorias = listOf("Acceso / Login", "Pagos", "Constancias", "Horarios", "Otro")
+    val scope = rememberCoroutineScope()
+
+    fun submitTicket() {
+        if (nombre.isBlank() || email.isBlank() || categoria.isBlank() || descripcion.isBlank()) {
+            feedback = "Completa todos los campos."
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+            feedback = null
+            when (
+                val result = repository.createSupportTicket(
+                    userId = user?.id,
+                    name = nombre,
+                    email = email,
+                    category = categoria,
+                    description = descripcion
+                )
+            ) {
+                is ApiResult.Success -> {
+                    feedback = result.data.message ?: "Solicitud enviada correctamente."
+                    categoria = ""
+                    descripcion = ""
+                }
+                is ApiResult.Error -> feedback = result.message
+            }
+            isLoading = false
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF2F3F8))
+            .verticalScroll(rememberScrollState())
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -131,18 +174,29 @@ fun SupportScreen(onBack: () -> Unit) {
                     )
                     Spacer(Modifier.height(20.dp))
 
+                    feedback?.let { message ->
+                        Text(
+                            message,
+                            color = if (message.startsWith("Solicitud enviada")) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp
+                        )
+                        Spacer(Modifier.height(10.dp))
+                    }
+
                     Button(
-                        onClick = { /* TODO */ },
+                        onClick = { submitTicket() },
+                        enabled = !isLoading,
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = blue)
                     ) {
                         Icon(Icons.Default.Send, null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Enviar solicitud")
+                        Text(if (isLoading) "Enviando..." else "Enviar solicitud")
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

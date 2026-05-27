@@ -1,9 +1,10 @@
-package com.example.cle_bot.ui.screens
+package com.example.cle_bot.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,8 +21,20 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
+import androidx.compose.ui.geometry.Rect
 import com.example.cle_bot.R
 import androidx.compose.foundation.Image
+import com.example.cle_bot.data.ApiResult
+import com.example.cle_bot.data.CleBotRepository
+import com.example.cle_bot.data.UserDto
 
 data class ChatMessage(val text: String, val isBot: Boolean)
 data class QuickAction(val icon: ImageVector, val label: String)
@@ -29,19 +42,69 @@ data class QuickAction(val icon: ImageVector, val label: String)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
+    repository: CleBotRepository,
+    user: UserDto?,
     onNavigateToFaq: () -> Unit,
     onNavigateToSupport: () -> Unit,
+    onNavigateToTramites: () -> Unit,
+    onNavigateToKardex: () -> Unit,
     onLogout: () -> Unit
 ) {
     val blue = Color(0xFF3D5BF5)
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+
+    // Objeto para ocultar la barra de herramientas de texto del sistema
+    val emptyTextToolbar = object : TextToolbar {
+        override val status: TextToolbarStatus = TextToolbarStatus.Hidden
+        override fun hide() {}
+        override fun showMenu(
+            rect: Rect,
+            onCopyRequested: (() -> Unit)?,
+            onPasteRequested: (() -> Unit)?,
+            onCutRequested: (() -> Unit)?,
+            onSelectAllRequested: (() -> Unit)?
+        ) {}
+    }
 
     var inputText by remember { mutableStateOf("") }
+    var isSending by remember { mutableStateOf(false) }
     val messages = remember {
         mutableStateListOf(
             ChatMessage("¡Hola! Soy tu asistente virtual CLEbot. ¿En qué puedo ayudarte hoy?", true)
         )
+    }
+
+    // Auto-scroll al final cuando hay mensajes nuevos
+    LaunchedEffect(messages.size, isSending) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
+    fun sendMessage(text: String) {
+        val message = text.trim()
+        if (message.isBlank() || isSending) return
+
+        messages.add(ChatMessage(message, false))
+        inputText = ""
+
+        scope.launch {
+            isSending = true
+            when (val result = repository.sendChatMessage(user?.id, message)) {
+                is ApiResult.Success -> {
+                    messages.add(
+                        ChatMessage(
+                            result.data.botReply ?: "No pude generar una respuesta en este momento.",
+                            true
+                        )
+                    )
+                }
+                is ApiResult.Error -> messages.add(ChatMessage(result.message, true))
+            }
+            isSending = false
+        }
     }
 
     val quickActions = listOf(
@@ -52,6 +115,9 @@ fun ChatScreen(
         QuickAction(Icons.Default.School, "Liberación"),
         QuickAction(Icons.Default.Edit, "Reinscripción")
     )
+    val displayName = user?.name ?: "Estudiante"
+    val displayEmail = user?.email ?: "Sin sesion activa"
+    val avatarInitial = displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "E"
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -83,8 +149,12 @@ fun ChatScreen(
                 listOf(
                     Triple(Icons.Default.Chat, "Chat actual") { scope.launch { drawerState.close() } },
                     Triple(Icons.Default.History, "Historial") { },
+                    Triple(Icons.Default.School, "Mi Kardex Académico") { onNavigateToKardex(); scope.launch { drawerState.close() } },
+                    Triple(Icons.Default.Assignment, "Trámites Paso a Paso") { onNavigateToTramites(); scope.launch { drawerState.close() } },
                     Triple(Icons.Default.Help, "Preguntas frecuentes") { onNavigateToFaq(); scope.launch { drawerState.close() } },
-                    Triple(Icons.Default.Settings, "Configuración") { }
+                    Triple(Icons.Default.SupportAgent, "Soporte") { onNavigateToSupport(); scope.launch { drawerState.close() } },
+                    Triple(Icons.Default.Settings, "Configuración") { },
+                    Triple(Icons.Default.Logout, "Cerrar sesión") { onLogout() }
                 ).forEach { (icon, label, action) ->
                     NavigationDrawerItem(
                         icon = { Icon(icon, null, tint = blue) },
@@ -106,11 +176,11 @@ fun ChatScreen(
                     Box(
                         Modifier.size(40.dp).background(Color.Gray, CircleShape),
                         contentAlignment = Alignment.Center
-                    ) { Text("E", color = Color.White, fontWeight = FontWeight.Bold) }
+                    ) { Text(avatarInitial, color = Color.White, fontWeight = FontWeight.Bold) }
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("Estudiante", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                        Text("estudiante@tuxtla.tecnm.mx", fontSize = 11.sp, color = Color.Gray)
+                        Text(displayName, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                        Text(displayEmail, fontSize = 11.sp, color = Color.Gray)
                     }
                 }
             }
@@ -149,23 +219,29 @@ fun ChatScreen(
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedTextField(
-                            value = inputText,
-                            onValueChange = { inputText = it },
-                            modifier = Modifier.weight(1f),
-                            placeholder = { Text("Escribe aquí....") },
-                            shape = RoundedCornerShape(24.dp),
-                            singleLine = true
-                        )
+                        CompositionLocalProvider(LocalTextToolbar provides emptyTextToolbar) {
+                            OutlinedTextField(
+                                value = inputText,
+                                onValueChange = { inputText = it },
+                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("Escribe aquí....") },
+                                shape = RoundedCornerShape(24.dp),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    autoCorrectEnabled = false,
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Send
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onSend = { sendMessage(inputText) }
+                                )
+                            )
+                        }
                         Spacer(Modifier.width(8.dp))
                         IconButton(
-                            onClick = {
-                                if (inputText.isNotBlank()) {
-                                    messages.add(ChatMessage(inputText, false))
-                                    inputText = ""
-                                    // TODO: llamar al agente de IA aquí
-                                }
-                            }
+                            onClick = { sendMessage(inputText) },
+                            enabled = !isSending
                         ) {
                             Icon(Icons.Default.Send, null, tint = blue)
                         }
@@ -173,76 +249,78 @@ fun ChatScreen(
                 }
             }
         ) { paddingValues ->
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFFF2F3F8))
                     .padding(paddingValues)
-                    .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Grid de acciones rápidas
-                item {
-                    Text(
-                        "¿Qué trámite necesitas realizar?",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-                    )
-                    Text(
-                        "Selecciona una opción o escribe tu consulta",
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+                // El LazyColumn ahora solo contiene los mensajes, no los botones rápidos
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 12.dp)
+                ) {
+                    // Mensajes del chat
+                    items(messages) { msg ->
+                        ChatBubble(msg)
+                    }
+                    if (isSending) {
+                        item {
+                            ChatBubble(ChatMessage("Escribiendo respuesta...", true))
+                        }
+                    }
+                }
 
-                    // 3 columnas de 2 botones cada fila
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        quickActions.chunked(2).forEach { row ->
+                // Contenedor fijo para las opciones/acciones rápidas
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                    shadowElevation = 4.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            "¿Qué trámite necesitas realizar?",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        
+                        // Grid de acciones rápidas (2 filas x 3 columnas para que sea más compacto)
+                        quickActions.chunked(3).forEach { row ->
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 row.forEach { action ->
                                     Card(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .aspectRatio(1.4f),
-                                        shape = RoundedCornerShape(14.dp),
-                                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                                        elevation = CardDefaults.cardElevation(2.dp),
-                                        onClick = {
-                                            messages.add(ChatMessage(action.label, false))
-                                            // TODO: enviar al agente
-                                        }
+                                            .height(70.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FF)),
+                                        onClick = { sendMessage(action.label) }
                                     ) {
                                         Column(
                                             modifier = Modifier.fillMaxSize(),
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.Center
                                         ) {
-                                            Box(
-                                                Modifier
-                                                    .size(44.dp)
-                                                    .background(Color(0xFFEEF0FF), CircleShape),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(action.icon, null, tint = blue, modifier = Modifier.size(24.dp))
-                                            }
-                                            Spacer(Modifier.height(6.dp))
-                                            Text(action.label, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                            Icon(action.icon, null, tint = blue, modifier = Modifier.size(20.dp))
+                                            Spacer(Modifier.height(4.dp))
+                                            Text(action.label, fontSize = 10.sp, fontWeight = FontWeight.Medium)
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    Spacer(Modifier.height(12.dp))
-                }
-
-                // Mensajes del chat
-                items(messages) { msg ->
-                    ChatBubble(msg)
                 }
             }
         }
@@ -257,11 +335,18 @@ fun ChatBubble(message: ChatMessage) {
         horizontalArrangement = if (message.isBot) Arrangement.Start else Arrangement.End
     ) {
         if (message.isBot) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_clebot),
-                contentDescription = "CLEbot logo",
-                modifier = Modifier.size(90.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(blue.copy(alpha = 0.1f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo_clebot),
+                    contentDescription = "CLEbot logo",
+                    modifier = Modifier.size(28.dp)
+                )
+            }
             Spacer(Modifier.width(8.dp))
         }
 

@@ -1,50 +1,46 @@
 package com.example.cle_bot.ui.theme.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.res.painterResource
 import com.example.cle_bot.R
-import androidx.compose.foundation.Image
 import com.example.cle_bot.data.ApiResult
 import com.example.cle_bot.data.CleBotRepository
 import kotlinx.coroutines.launch
 
-private val AppBlue2 = Color(0xFF3D5BF5)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
+fun ResetPasswordScreen(
     repository: CleBotRepository,
+    initialToken: String,
     onBack: () -> Unit,
-    onLoginClick: () -> Unit
+    onPasswordChanged: () -> Unit
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var numControl by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    val blue = Color(0xFF3D5BF5)
+    val scope = rememberCoroutineScope()
+    var token by remember(initialToken) { mutableStateOf(initialToken) }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var feedback by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
-    fun submitRegister() {
-        if (nombre.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-            feedback = "Completa los campos obligatorios."
+    fun submitReset() {
+        if (token.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+            feedback = "Completa el token y la nueva contraseña."
             return
         }
         if (password != confirmPassword) {
@@ -59,8 +55,8 @@ fun RegisterScreen(
         scope.launch {
             isLoading = true
             feedback = null
-            when (val result = repository.register(nombre, numControl, email, password)) {
-                is ApiResult.Success -> onLoginClick()
+            when (val result = repository.resetPassword(token, password)) {
+                is ApiResult.Success -> onPasswordChanged()
                 is ApiResult.Error -> feedback = result.message
             }
             isLoading = false
@@ -71,17 +67,15 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF2F3F8))
-            .verticalScroll(rememberScrollState())
     ) {
-        // Top bar
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, "Volver")
+                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
             }
-            Text("Volver al inicio", fontSize = 14.sp, color = Color.Gray)
+            Text("Volver", fontSize = 14.sp, color = Color.Gray)
         }
 
         Column(
@@ -95,9 +89,15 @@ fun RegisterScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text("Crear cuenta", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text("Completa tus datos para registrarte", fontSize = 13.sp, color = Color.Gray)
-            Spacer(Modifier.height(24.dp))
+            Text("Cambiar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Usa el token generado para registrar una nueva contraseña.",
+                fontSize = 13.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(28.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -106,75 +106,62 @@ fun RegisterScreen(
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    listOf(
-                        Triple("Nombre", nombre, { v: String -> nombre = v }),
-                        Triple("Numero de control (en caso de ser vigente)", numControl, { v: String -> numControl = v }),
-                        Triple("Correo", email, { v: String -> email = v })
-                    ).forEach { (label, value, setter) ->
-                        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Spacer(Modifier.height(6.dp))
-                        OutlinedTextField(
-                            value = value,
-                            onValueChange = setter,
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text(label) },
-                            shape = RoundedCornerShape(10.dp),
-                            singleLine = true
-                        )
-                        Spacer(Modifier.height(14.dp))
-                    }
+                    Text("Token", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = token,
+                        onValueChange = { token = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Pega tu token") },
+                        shape = RoundedCornerShape(10.dp),
+                        singleLine = true
+                    )
 
-                    Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(14.dp))
+                    Text("Nueva contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Crea una nueva contraseña") },
+                        placeholder = { Text("Nueva contraseña") },
+                        leadingIcon = { Icon(Icons.Default.Lock, null) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
                         singleLine = true
                     )
-                    Spacer(Modifier.height(14.dp))
 
-                    Text("Confirma la contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(14.dp))
+                    Text("Confirmar contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("Repite la contraseña") },
+                        leadingIcon = { Icon(Icons.Default.Lock, null) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
                         singleLine = true
                     )
-                    Spacer(Modifier.height(20.dp))
 
+                    Spacer(Modifier.height(16.dp))
                     feedback?.let { message ->
                         Text(message, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                         Spacer(Modifier.height(10.dp))
                     }
 
                     Button(
-                        onClick = { submitRegister() },
+                        onClick = { submitReset() },
                         enabled = !isLoading,
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AppBlue2)
+                        colors = ButtonDefaults.buttonColors(containerColor = blue)
                     ) {
-                        Text(if (isLoading) "Creando..." else "Crear cuenta", fontSize = 16.sp)
+                        Text(if (isLoading) "Guardando..." else "Guardar nueva contraseña")
                     }
                 }
             }
-
-            Spacer(Modifier.height(20.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("¿Ya tienes una cuenta? ", fontSize = 13.sp)
-                TextButton(onClick = onLoginClick, contentPadding = PaddingValues(0.dp)) {
-                    Text("Inicia sesión", color = AppBlue2, fontSize = 13.sp)
-                }
-            }
-            Spacer(Modifier.height(24.dp))
         }
     }
 }

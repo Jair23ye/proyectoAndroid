@@ -1,4 +1,4 @@
-package com.example.cle_bot.ui.screens
+package com.example.cle_bot.ui.theme.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.cle_bot.ui.screens
+package com.example.cle_bot.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,12 +23,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import com.example.cle_bot.R
 import androidx.compose.foundation.Image
+import com.example.cle_bot.data.ApiResult
+import com.example.cle_bot.data.CleBotRepository
+import com.example.cle_bot.data.UserDto
+import kotlinx.coroutines.launch
 
 private val AppBlue = Color(0xFF3D5BF5)
 
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
+    repository: CleBotRepository,
+    onLoginSuccess: (UserDto) -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPassword: () -> Unit,
     onSupportClick: () -> Unit
@@ -34,6 +41,33 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var feedback by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    fun submitLogin() {
+        if (email.isBlank() || password.isBlank()) {
+            feedback = "Ingresa correo y contraseña."
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+            feedback = null
+            when (val result = repository.login(email, password)) {
+                is ApiResult.Success -> {
+                    val user = result.data.user
+                    if (user != null) {
+                        onLoginSuccess(user)
+                    } else {
+                        feedback = "No se recibio la informacion del usuario."
+                    }
+                }
+                is ApiResult.Error -> feedback = result.message
+            }
+            isLoading = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -89,6 +123,14 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Ingresa tu Contraseña") },
                     leadingIcon = { Icon(Icons.Default.Lock, null) },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
                     visualTransformation = if (passwordVisible)
                         VisualTransformation.None else PasswordVisualTransformation(),
                     shape = RoundedCornerShape(10.dp),
@@ -102,14 +144,20 @@ fun LoginScreen(
                     }
                 }
 
+                feedback?.let { message ->
+                    Text(message, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                    Spacer(Modifier.height(8.dp))
+                }
+
                 Spacer(Modifier.height(8.dp))
                 Button(
-                    onClick = onLoginClick,
+                    onClick = { submitLogin() },
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppBlue)
                 ) {
-                    Text("Iniciar sesión", fontSize = 16.sp)
+                    Text(if (isLoading) "Iniciando..." else "Iniciar sesión", fontSize = 16.sp)
                 }
 
                 Spacer(Modifier.height(16.dp))

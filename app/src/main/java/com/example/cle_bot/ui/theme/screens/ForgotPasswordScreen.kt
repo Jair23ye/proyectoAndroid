@@ -1,4 +1,4 @@
-package com.example.cle_bot.ui.screens
+package com.example.cle_bot.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,10 +20,49 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import com.example.cle_bot.R
 import androidx.compose.foundation.Image
+import com.example.cle_bot.data.ApiResult
+import com.example.cle_bot.data.CleBotRepository
+import kotlinx.coroutines.launch
 @Composable
-fun ForgotPasswordScreen(onBack: () -> Unit, onSupportClick: () -> Unit) {
+fun ForgotPasswordScreen(
+    repository: CleBotRepository,
+    onBack: () -> Unit,
+    onTokenGenerated: (String) -> Unit,
+    onResetPasswordClick: () -> Unit,
+    onSupportClick: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
+    var feedback by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var hasToken by remember { mutableStateOf(false) }
     val blue = Color(0xFF3D5BF5)
+    val scope = rememberCoroutineScope()
+
+    fun submitRecovery() {
+        if (email.isBlank()) {
+            feedback = "Ingresa tu correo."
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+            feedback = null
+            when (val result = repository.forgotPassword(email)) {
+                is ApiResult.Success -> {
+                    val token = result.data.resetToken
+                    feedback = if (token.isNullOrBlank()) {
+                        result.data.message ?: "Solicitud procesada."
+                    } else {
+                        hasToken = true
+                        onTokenGenerated(token)
+                        "${result.data.message ?: "Token generado."}\nToken de prueba: $token"
+                    }
+                }
+                is ApiResult.Error -> feedback = result.message
+            }
+            isLoading = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -78,13 +117,35 @@ fun ForgotPasswordScreen(onBack: () -> Unit, onSupportClick: () -> Unit) {
                     Spacer(Modifier.height(16.dp))
 
                     Button(
-                        onClick = { /* TODO */ },
+                        onClick = { submitRecovery() },
+                        enabled = !isLoading,
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = blue)
-                    ) { Text("Enviar las instrucciones") }
+                    ) { Text(if (isLoading) "Enviando..." else "Enviar las instrucciones") }
 
                     Spacer(Modifier.height(16.dp))
+
+                    feedback?.let { message ->
+                        Text(
+                            message,
+                            color = if (message.startsWith("Token")) MaterialTheme.colorScheme.primary else Color.DarkGray,
+                            fontSize = 12.sp
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+
+                    if (hasToken) {
+                        OutlinedButton(
+                            onClick = onResetPasswordClick,
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = blue)
+                        ) {
+                            Text("Cambiar contraseña con token")
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
 
                     // Tip card
                     Surface(
