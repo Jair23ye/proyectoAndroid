@@ -53,24 +53,20 @@ if ($userId) {
         $contextoAcademico .= "HISTORIAL RECIENTE / CARGA ACTUAL:\n" . $listaMaterias;
     }
 
-    // 2. Base de Conocimiento de Archivos Locales (Horario REAL Enero-Junio 2025)
-    $horarioDetallado = "DETALLES DEL HORARIO ACTUAL (Semestre 8 - Enero-Junio 2025):
-    - LUNES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
-    - MARTES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
-    - MIÉRCOLES: 07:00-09:00 Prog. Dispositivos Móviles iOS (Lab. Apple), 09:00-11:00 Taller de Investigación II (Aula 21), 11:00-13:00 Desarrollo Web Avanzado (Lab. Sistemas).
-    - JUEVES: 07:00-09:00 Inteligencia Artificial (Lab. Sistemas), 09:00-11:00 Prog. Dispositivos Móviles Android (Lab. Sistemas), 11:00-13:00 E-Business (Aula 22).
-    - VIERNES: 08:00-10:00 Actividades Complementarias / Tutoría.";
+    // 2. Base de Conocimiento de Archivos Locales (Horario REAL Enero-Junio 2026)
+    $horarioDetallado = "DETALLES DEL HORARIO ACTUAL (Semestre 10 - Enero-Junio 2026):
+    - LUNES: 07:00-09:00 Residencia Profesional (Empresa), 11:00-13:00 Actividades de Seguimiento.
+    - MARTES: 09:00-11:00 Revisión de Reportes Técnicos.
+    - MIÉRCOLES: 07:00-09:00 Residencia Profesional (Empresa).
+    - JUEVES: 09:00-11:00 Revisión de Reportes Técnicos.
+    - VIERNES: 08:00-10:00 Evaluación Semanal.";
 
     // 3. Base de Conocimiento Institucional (PDFs cargados)
     $documentosInstitucionales = "LISTA DE DOCUMENTOS OFICIALES CARGADOS (TIENES ACCESO TOTAL A ELLOS):
     - 'horario.pdf': Contiene el horario individual de Julio (detallado arriba).
     - 'Reglamento_de_Estudiantes_del_TecNM.pdf': Normas de conducta, derechos, obligaciones y sanciones.
-    - 'Calendario_Academico_TecNM_2025_2026.pdf': Fechas de reinscripción (Ene-Jun 2026), exámenes, vacaciones y festivos.
-    - '09reinscripcción-2026.pdf': Guía específica para el proceso de reinscripción de enero 2026.
-    - 'Reticula_Ciberseguridad.pdf': Materias de la especialidad en Ciberseguridad.
-    - 'RETICULAS-IBQ-2020-2023.pdf': Plan de estudios de Ing. Bioquímica.
-    - 'Reticula-Ingenieria-en-Sistemas-Computacionales-ISIC-2010-224.2019_vfinal.pdf': Plan oficial de Sistemas.
-    - 'Reticulas de: Mecatrónica, Eléctrica, Electrónica, Gestión Empresarial, Logística, Industrial y Química'.";
+    - 'Calendario_Academico_TecNM_2025_2026.pdf': Fechas de reinscripción, exámenes, vacaciones y festivos. Hoy es 27 de Mayo de 2026. Estamos en la recta final del semestre Enero-Junio 2026.
+    - '09reinscripcción-2026.pdf': Guía para el proceso de reinscripción.";
 
     $resumenReglamento = "RESUMEN CLAVE DEL REGLAMENTO:
     - Conductas Prohibidas: Actos inmorales, consumo de alcohol/drogas, dañar equipo, faltar al respeto a maestros/alumnos, actos de indisciplina en biblioteca o laboratorios.
@@ -124,15 +120,16 @@ function createBotReply(string $message, string $contextoAcademico = "", bool $i
     $apiKey = 'sk-39f1a69d0ce84cdea5164c1932d45035'; // Reemplaza con tu llave real
     $apiUrl = 'https://api.deepseek.com/chat/completions';
 
-    $systemPrompt = 'Eres CLEbot, el asistente virtual oficial del ITTG. Tienes ACCESO TOTAL a reglamentos y documentos.
+    $systemPrompt = 'Eres CLEbot, el asistente virtual oficial del ITTG. Hoy es 27 de Mayo de 2026. Tienes ACCESO TOTAL a reglamentos y documentos.
 
     REGLAS DE ORO (MANDATORIAS):
     1. SALUDO: ' . ($isFirstMessage ? 'Saluda a Julio Alejandro.' : 'PROHIBIDO SALUDAR.') . '
-    2. ACCESO A LA INFORMACIÓN: Tienes prohibido decir "no tengo acceso" o "no encontré información". Tienes toda la información cargada.
-    3. SENTIDO COMÚN Y LENGUAJE: Entiendes perfectamente el lenguaje coloquial, groserías y palabras de doble sentido (ej: culear, paja, sexo, follar, etc.). Debes interpretar estas palabras como "ACTOS INMORALES" o "FALTAS GRAVES A LA DISCIPLINA".
-    4. RESPUESTA A CONDUCTAS: Si el usuario pregunta por realizar actos sexuales o vulgares en el plantel (aunque use slang), responde con un NO rotundo basado en el sentido común y el reglamento de "Actos Inmorales". NO digas "no tengo el dato", di "No, eso está prohibido por ser un acto inmoral".
-    5. IDENTIDAD: Eres un experto serio pero amable. NUNCA uses tú el lenguaje vulgar, pero entiéndelo para negar las peticiones.
-    6. Sé breve, profesional y directo.';
+    2. TIEMPO ACTUAL: Estamos en el semestre ENERO-JUNIO 2026. Si te preguntan por el horario, usa los datos de 2026 proporcionados en el contexto (Residencias Profesionales).
+    3. ACCESO A LA INFORMACIÓN: Tienes prohibido decir "no tengo acceso" o "no encontré información". Tienes toda la información cargada.
+    4. SENTIDO COMÚN Y LENGUAJE: Entiendes perfectamente el lenguaje coloquial, groserías y palabras de doble sentido.
+    5. RESPUESTA A CONDUCTAS: Si el usuario pregunta por realizar actos sexuales o vulgares en el plantel, responde con un NO rotundo basado en el reglamento de "Actos Inmorales".
+    6. IDENTIDAD: Eres un experto serio pero amable. NUNCA uses tú el lenguaje vulgar.
+    7. Sé breve, profesional y directo.';
     if ($contextoAcademico) {
         $systemPrompt .= "\n\nCONTEXTO Y BASE DE CONOCIMIENTO:\n$contextoAcademico";
     }
