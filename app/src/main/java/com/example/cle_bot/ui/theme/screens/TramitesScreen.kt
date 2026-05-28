@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.example.cle_bot.data.TramiteRepository
@@ -34,12 +35,18 @@ fun TramitesScreen(
     }
 
     Scaffold(
+        containerColor = Color.Black,
         topBar = {
             TopAppBar(
-                title = { Text("Trámites Disponibles") },
+                title = { Text("Trámites Disponibles", color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Black,
+                    navigationIconContentColor = Color.White,
+                    titleContentColor = Color.White
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 }
             )
@@ -49,28 +56,51 @@ fun TramitesScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Buscar trámite") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Buscar trámite", color = Color.LightGray) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color.Black,
+                    unfocusedContainerColor = Color.Black,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.Gray,
+                    cursorColor = Color.White
+                )
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             if (isLoading) {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    CircularProgressIndicator(color = Color.White)
+                }
             } else {
                 LazyColumn {
                     items(tramites) { tramite ->
                         Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFF1A1A1A)
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
                                 .clickable { onTramiteClick(tramite.id) }
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = tramite.title, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    text = tramite.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White
+                                )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = tramite.category, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                                Text(
+                                    text = tramite.category,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.LightGray
+                                )
                             }
                         }
                     }

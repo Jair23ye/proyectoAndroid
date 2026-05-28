@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -50,20 +51,30 @@ fun KardexScreen(
     }
 
     Scaffold(
+        containerColor = Color.Black,
         topBar = {
             TopAppBar(
-                title = { Text("Mi Kardex Académico") },
+                title = { Text("Mi Kardex Académico", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = Color.White
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Black,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize().background(Color.Black)) {
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
             } else if (errorMessage != null) {
                 Text(
                     text = errorMessage!!,
@@ -73,6 +84,7 @@ fun KardexScreen(
             } else if (kardexData.isEmpty()) {
                 Text(
                     text = "No hay registros académicos disponibles.",
+                    color = Color.White,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
@@ -102,26 +114,29 @@ fun KardexScreen(
 fun KardexSummaryHeader(promedio: Double?, total: Int?, aprobados: Int?) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Promedio", style = MaterialTheme.typography.labelMedium)
+                Text("Promedio", fontSize = 12.sp, color = Color.LightGray)
                 Text(
                     text = promedio?.toString() ?: "0.0",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3D5BF5)
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Créditos", style = MaterialTheme.typography.labelMedium)
+                Text("Créditos", fontSize = 12.sp, color = Color.LightGray)
                 Text(
                     text = "${aprobados ?: 0} / ${total ?: 0}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
         }
@@ -131,13 +146,15 @@ fun KardexSummaryHeader(promedio: Double?, total: Int?, aprobados: Int?) {
 @Composable
 fun PeriodHeader(periodo: String) {
     Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        color = Color(0xFF2A2D3F),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = periodo,
-            style = MaterialTheme.typography.titleMedium,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
+            color = Color.White,
             modifier = Modifier.padding(8.dp)
         )
     }
@@ -147,6 +164,7 @@ fun PeriodHeader(periodo: String) {
 fun KardexRow(materia: CalificacionDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -156,15 +174,16 @@ fun KardexRow(materia: CalificacionDto) {
             ) {
                 Text(
                     text = materia.materia,
-                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = materia.calificacion,
-                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 18.sp,
                     color = if (materia.calificacion.toIntOrNull() ?: 0 >= 70) 
-                            Color(0xFF2E7D32) else Color.Red,
+                            Color(0xFF4CAF50) else Color(0xFFFF5252),
                     fontWeight = FontWeight.ExtraBold
                 )
             }
@@ -177,11 +196,13 @@ fun KardexRow(materia: CalificacionDto) {
             ) {
                 Text(
                     text = "Clave: ${materia.clave} | Créditos: ${materia.creditos}",
-                    style = MaterialTheme.typography.bodySmall
+                    fontSize = 11.sp,
+                    color = Color.LightGray
                 )
                 Text(
                     text = materia.evaluacion,
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 11.sp,
+                    color = Color.Gray,
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
             }
@@ -190,8 +211,8 @@ fun KardexRow(materia: CalificacionDto) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Obs: ${materia.observaciones}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    fontSize = 11.sp,
+                    color = Color.Gray
                 )
             }
         }

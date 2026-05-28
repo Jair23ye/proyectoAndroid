@@ -72,12 +72,12 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF2F3F8))
+            .background(Color.Black)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Logo placeholder — reemplaza con tu Image() cuando tengas el asset
+        // Logo placeholder
         Image(
             painter = painterResource(id = R.drawable.logo_clebot),
             contentDescription = "CLEbot logo",
@@ -85,11 +85,11 @@ fun LoginScreen(
         )
 
         Spacer(Modifier.height(12.dp))
-        Text("CLEbot", fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Text("CLEbot", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Text(
             "Inicia sesión con tu correo institucional",
             fontSize = 13.sp,
-            color = Color.Gray,
+            color = Color.LightGray,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(32.dp))
@@ -98,43 +98,64 @@ fun LoginScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(Modifier.padding(20.dp)) {
-                Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                 Spacer(Modifier.height(6.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Ingresa tu correo Institucional") },
-                    leadingIcon = { Icon(Icons.Default.Email, null) },
+                    placeholder = { Text("Ingresa tu correo Institucional", color = Color.Gray) },
+                    leadingIcon = { Icon(Icons.Default.Email, null, tint = AppBlue) },
                     shape = RoundedCornerShape(10.dp),
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedPlaceholderColor = Color.Gray,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        focusedLeadingIconColor = AppBlue,
+                        unfocusedLeadingIconColor = Color.Gray,
+                        focusedBorderColor = AppBlue,
+                        unfocusedBorderColor = Color.Gray
+                    )
                 )
 
                 Spacer(Modifier.height(14.dp))
-                Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                 Spacer(Modifier.height(6.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Ingresa tu Contraseña") },
-                    leadingIcon = { Icon(Icons.Default.Lock, null) },
+                    placeholder = { Text("Ingresa tu Contraseña", color = Color.Gray) },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = AppBlue) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                tint = Color.Gray
                             )
                         }
                     },
                     visualTransformation = if (passwordVisible)
                         VisualTransformation.None else PasswordVisualTransformation(),
                     shape = RoundedCornerShape(10.dp),
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedPlaceholderColor = Color.Gray,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        focusedLeadingIconColor = AppBlue,
+                        unfocusedLeadingIconColor = Color.Gray,
+                        focusedBorderColor = AppBlue,
+                        unfocusedBorderColor = Color.Gray
+                    )
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -157,7 +178,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppBlue)
                 ) {
-                    Text(if (isLoading) "Iniciando..." else "Iniciar sesión", fontSize = 16.sp)
+                    Text(if (isLoading) "Iniciando..." else "Iniciar sesión", fontSize = 16.sp, color = Color.White)
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -165,9 +186,9 @@ fun LoginScreen(
                     Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    HorizontalDivider(Modifier.weight(1f))
-                    Text("  o  ", color = Color.Gray, fontSize = 12.sp)
-                    HorizontalDivider(Modifier.weight(1f))
+                    HorizontalDivider(Modifier.weight(1f), color = Color.DarkGray)
+                    Text("  o  ", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    HorizontalDivider(Modifier.weight(1f), color = Color.DarkGray)
                 }
                 Spacer(Modifier.height(16.dp))
 
@@ -175,7 +196,8 @@ fun LoginScreen(
                     onClick = onRegisterClick,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AppBlue)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AppBlue),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AppBlue)
                 ) {
                     Text("Crear nueva cuenta", fontSize = 16.sp)
                 }
@@ -184,9 +206,9 @@ fun LoginScreen(
 
         Spacer(Modifier.height(24.dp))
         Row {
-            Text("¿Tienes problemas para acceder? ", fontSize = 12.sp, color = Color.Gray)
+            Text("¿Tienes problemas para acceder? ", fontSize = 12.sp, color = Color.LightGray)
             TextButton(onClick = onSupportClick, contentPadding = PaddingValues(0.dp)) {
-                Text("contacta a soporte", color = AppBlue, fontSize = 12.sp)
+                Text("contacta a soporte", color = AppBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
 

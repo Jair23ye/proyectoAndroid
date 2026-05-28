@@ -58,6 +58,7 @@ fun FaqScreen(onBack: () -> Unit) {
                 "PREGUNTAS FRECUENTES",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
+                color = Color.Black,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
 
@@ -73,7 +74,12 @@ fun FaqScreen(onBack: () -> Unit) {
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Column(Modifier.padding(16.dp)) {
-                        Text(item.question, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            item.question,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
                         AnimatedVisibility(visible = expanded) {
                             Text(
                                 item.answer,

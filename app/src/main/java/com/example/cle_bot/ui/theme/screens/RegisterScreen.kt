@@ -70,7 +70,7 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF2F3F8))
+            .background(Color.Black)
             .verticalScroll(rememberScrollState())
     ) {
         // Top bar
@@ -79,9 +79,9 @@ fun RegisterScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, "Volver")
+                Icon(Icons.Default.ArrowBack, "Volver", tint = Color.White)
             }
-            Text("Volver al inicio", fontSize = 14.sp, color = Color.Gray)
+            Text("Volver al inicio", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Medium)
         }
 
         Column(
@@ -95,14 +95,14 @@ fun RegisterScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text("Crear cuenta", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text("Completa tus datos para registrarte", fontSize = 13.sp, color = Color.Gray)
+            Text("Crear cuenta", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text("Completa tus datos para registrarte", fontSize = 13.sp, color = Color.LightGray)
             Spacer(Modifier.height(24.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
@@ -111,42 +111,66 @@ fun RegisterScreen(
                         Triple("Numero de control (en caso de ser vigente)", numControl, { v: String -> numControl = v }),
                         Triple("Correo", email, { v: String -> email = v })
                     ).forEach { (label, value, setter) ->
-                        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                         Spacer(Modifier.height(6.dp))
                         OutlinedTextField(
                             value = value,
                             onValueChange = setter,
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text(label) },
+                            placeholder = { Text(label, color = Color.Gray) },
                             shape = RoundedCornerShape(10.dp),
-                            singleLine = true
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedPlaceholderColor = Color.Gray,
+                                unfocusedPlaceholderColor = Color.Gray,
+                                focusedBorderColor = AppBlue2,
+                                unfocusedBorderColor = Color.Gray
+                            )
                         )
                         Spacer(Modifier.height(14.dp))
                     }
 
-                    Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Crea una nueva contraseña") },
+                        placeholder = { Text("Crea una nueva contraseña", color = Color.Gray) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedPlaceholderColor = Color.Gray,
+                            unfocusedPlaceholderColor = Color.Gray,
+                            focusedBorderColor = AppBlue2,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(14.dp))
 
-                    Text("Confirma la contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Confirma la contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Repite la contraseña") },
+                        placeholder = { Text("Repite la contraseña", color = Color.Gray) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedPlaceholderColor = Color.Gray,
+                            unfocusedPlaceholderColor = Color.Gray,
+                            focusedBorderColor = AppBlue2,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(20.dp))
 
@@ -162,16 +186,16 @@ fun RegisterScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = AppBlue2)
                     ) {
-                        Text(if (isLoading) "Creando..." else "Crear cuenta", fontSize = 16.sp)
+                        Text(if (isLoading) "Creando..." else "Crear cuenta", fontSize = 16.sp, color = Color.White)
                     }
                 }
             }
 
             Spacer(Modifier.height(20.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("¿Ya tienes una cuenta? ", fontSize = 13.sp)
+                Text("¿Ya tienes una cuenta? ", fontSize = 13.sp, color = Color.White)
                 TextButton(onClick = onLoginClick, contentPadding = PaddingValues(0.dp)) {
-                    Text("Inicia sesión", color = AppBlue2, fontSize = 13.sp)
+                    Text("Inicia sesión", color = AppBlue2, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(Modifier.height(24.dp))

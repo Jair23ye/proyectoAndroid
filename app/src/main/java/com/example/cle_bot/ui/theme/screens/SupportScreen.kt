@@ -3,11 +3,12 @@ package com.example.cle_bot.ui.theme.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import com.example.cle_bot.R
 import androidx.compose.foundation.Image
@@ -41,6 +41,7 @@ fun SupportScreen(
     var expanded by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var isOnline by remember { mutableStateOf(true) }
     val categorias = listOf("Acceso / Login", "Pagos", "Constancias", "Horarios", "Otro")
     val scope = rememberCoroutineScope()
 
@@ -63,11 +64,20 @@ fun SupportScreen(
                 )
             ) {
                 is ApiResult.Success -> {
-                    feedback = result.data.message ?: "Solicitud enviada correctamente."
+                    val isResultOffline = result.data.message == "Offline"
+                    isOnline = !isResultOffline
+                    feedback = if (isResultOffline) {
+                        "El sistema de soporte está fuera de línea. Tu solicitud se guardará localmente."
+                    } else {
+                        result.data.message ?: "Solicitud enviada correctamente."
+                    }
                     categoria = ""
                     descripcion = ""
                 }
-                is ApiResult.Error -> feedback = result.message
+                is ApiResult.Error -> {
+                    isOnline = false
+                    feedback = result.message
+                }
             }
             isLoading = false
         }
@@ -76,15 +86,15 @@ fun SupportScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF2F3F8))
+            .background(Color.Black)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
-            Text("Volver al inicio", fontSize = 14.sp, color = Color.Gray)
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White) }
+            Text("Volver al inicio", fontSize = 14.sp, color = Color.LightGray)
         }
 
         Column(
@@ -98,44 +108,70 @@ fun SupportScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text("Centro de soporte", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Centro de soporte", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(if (isOnline) Color(0xFF4CAF50) else Color.Gray, CircleShape)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    if (isOnline) "En línea" else "Fuera de línea",
+                    fontSize = 12.sp,
+                    color = if (isOnline) Color(0xFF4CAF50) else Color.Gray
+                )
+            }
+            Spacer(Modifier.height(4.dp))
             Text(
                 "Estamos aquí para ayudarte en cualquier problema",
-                fontSize = 13.sp, color = Color.Gray, textAlign = TextAlign.Center
+                fontSize = 13.sp, color = Color.LightGray, textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(24.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    Text("Enviar solicitud a soporte", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text("Enviar solicitud a soporte", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Spacer(Modifier.height(14.dp))
 
-                    Text("Nombre", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Nombre", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = nombre, onValueChange = { nombre = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Nombre completo") },
-                        shape = RoundedCornerShape(10.dp), singleLine = true
+                        placeholder = { Text("Nombre completo", color = Color.Gray) },
+                        shape = RoundedCornerShape(10.dp), singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = blue,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(14.dp))
 
-                    Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = email, onValueChange = { email = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ingresa tu correo") },
-                        shape = RoundedCornerShape(10.dp), singleLine = true
+                        placeholder = { Text("Ingresa tu correo", color = Color.Gray) },
+                        shape = RoundedCornerShape(10.dp), singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = blue,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(14.dp))
 
-                    Text("Categoria del problema", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Categoria del problema", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -145,18 +181,25 @@ fun SupportScreen(
                             value = categoria,
                             onValueChange = {},
                             readOnly = true,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(),
-                            placeholder = { Text("Seleccione una categoria") },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            placeholder = { Text("Seleccione una categoria", color = Color.Gray) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = blue,
+                                unfocusedBorderColor = Color.Gray
+                            )
                         )
                         ExposedDropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.background(Color(0xFF1E1E1E))
                         ) {
                             categorias.forEach {
                                 DropdownMenuItem(
-                                    text = { Text(it) },
+                                    text = { Text(it, color = Color.White) },
                                     onClick = { categoria = it; expanded = false }
                                 )
                             }
@@ -164,13 +207,19 @@ fun SupportScreen(
                     }
                     Spacer(Modifier.height(14.dp))
 
-                    Text("Describe tu problema", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Describe tu problema", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = descripcion, onValueChange = { descripcion = it },
                         modifier = Modifier.fillMaxWidth().height(120.dp),
-                        placeholder = { Text("Cuentanos que estas experimentando...") },
-                        shape = RoundedCornerShape(10.dp)
+                        placeholder = { Text("Cuentanos que estas experimentando...", color = Color.Gray) },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = blue,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(20.dp))
 
@@ -190,7 +239,7 @@ fun SupportScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = blue)
                     ) {
-                        Icon(Icons.Default.Send, null)
+                        Icon(Icons.AutoMirrored.Filled.Send, null)
                         Spacer(Modifier.width(8.dp))
                         Text(if (isLoading) "Enviando..." else "Enviar solicitud")
                     }

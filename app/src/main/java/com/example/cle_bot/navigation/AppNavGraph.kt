@@ -19,9 +19,21 @@ import com.example.cle_bot.ui.theme.screens.*
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     val context = LocalContext.current
-    val repository = remember { CleBotRepository() }
+    val database = remember { 
+        CleBotDatabase.getDatabase(context).also { 
+            com.example.cle_bot.data.local.DatabaseInitializer.populateDatabase(it)
+        }
+    }
+    val repository = remember { 
+        CleBotRepository(
+            userDao = database.userDao(),
+            chatDao = database.chatDao(),
+            kardexDao = database.kardexDao(),
+            tramiteDao = database.tramiteDao()
+        ) 
+    }
     val tramiteRepository = remember { 
-        TramiteRepository(dao = CleBotDatabase.getDatabase(context).tramiteDao()) 
+        TramiteRepository(dao = database.tramiteDao())
     }
     val sessionManager = remember { SessionManager(context) }
     var currentUser by remember { 

@@ -67,14 +67,14 @@ fun ForgotPasswordScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF2F3F8))
+            .background(Color.Black)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
-            Text("Volver al inicio", fontSize = 14.sp, color = Color.Gray)
+            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null, tint = Color.White) }
+            Text("Volver al inicio", fontSize = 14.sp, color = Color.LightGray)
         }
 
         Column(
@@ -88,31 +88,39 @@ fun ForgotPasswordScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text("Recuperar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Recuperar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(Modifier.height(8.dp))
             Text(
                 "Ingresa tu correo con el que creaste la cuenta y te enviamos las instrucciones",
-                fontSize = 13.sp, color = Color.Gray, textAlign = TextAlign.Center
+                fontSize = 13.sp, color = Color.LightGray, textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(32.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Correo", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ingresa tu correo Institucional") },
-                        leadingIcon = { Icon(Icons.Default.Email, null) },
+                        placeholder = { Text("Ingresa tu correo Institucional", color = Color.Gray) },
+                        leadingIcon = { Icon(Icons.Default.Email, null, tint = blue) },
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedBorderColor = blue,
+                            unfocusedBorderColor = Color.Gray
+                        )
                     )
                     Spacer(Modifier.height(16.dp))
 
@@ -129,10 +137,11 @@ fun ForgotPasswordScreen(
                     feedback?.let { message ->
                         Text(
                             message,
-                            color = if (message.startsWith("Token")) MaterialTheme.colorScheme.primary else Color.DarkGray,
-                            fontSize = 12.sp
+                            color = if (message.contains("éxito") || message.contains("Token")) Color.Green else Color.Red,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
                         )
-                        Spacer(Modifier.height(16.dp))
                     }
 
                     if (hasToken) {
@@ -149,7 +158,7 @@ fun ForgotPasswordScreen(
 
                     // Tip card
                     Surface(
-                        color = Color(0xFFEEF0FF),
+                        color = Color(0xFF2A2D3F),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(Modifier.padding(14.dp)) {
@@ -157,7 +166,8 @@ fun ForgotPasswordScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "Consejo: Asegurate de usar tu correo institucional en caso de ser alumno vigente o tu correo personal en caso de ser alumno externo.",
-                                fontSize = 13.sp
+                                fontSize = 13.sp,
+                                color = Color.White
                             )
                         }
                     }
@@ -166,7 +176,7 @@ fun ForgotPasswordScreen(
 
             Spacer(Modifier.height(24.dp))
             Row {
-                Text("¿Sigues teniendo problemas? ", fontSize = 12.sp, color = Color.Gray)
+                Text("¿Sigues teniendo problemas? ", fontSize = 12.sp, color = Color.LightGray)
                 TextButton(onClick = onSupportClick, contentPadding = PaddingValues(0.dp)) {
                     Text("contacta a soporte", color = blue, fontSize = 12.sp)
                 }

@@ -89,7 +89,7 @@ fun ResetPasswordScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text("Cambiar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Cambiar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
             Spacer(Modifier.height(8.dp))
             Text(
                 "Usa el token generado para registrar una nueva contraseña.",
@@ -106,43 +106,61 @@ fun ResetPasswordScreen(
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    Text("Token", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Token", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.Black)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = token,
                         onValueChange = { token = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Pega tu token") },
+                        placeholder = { Text("Pega tu token", color = Color.Gray) },
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
 
                     Spacer(Modifier.height(14.dp))
-                    Text("Nueva contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Nueva contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.Black)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Nueva contraseña") },
+                        placeholder = { Text("Nueva contraseña", color = Color.Gray) },
                         leadingIcon = { Icon(Icons.Default.Lock, null) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
 
                     Spacer(Modifier.height(14.dp))
-                    Text("Confirmar contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text("Confirmar contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.Black)
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Repite la contraseña") },
+                        placeholder = { Text("Repite la contraseña", color = Color.Gray) },
                         leadingIcon = { Icon(Icons.Default.Lock, null) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(10.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
 
                     Spacer(Modifier.height(16.dp))

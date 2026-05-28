@@ -6,12 +6,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [TramiteEntity::class, RequisitoEntity::class, PasoEntity::class, ProgresoEntity::class],
-    version = 1,
+    entities = [
+        TramiteEntity::class,
+        RequisitoEntity::class,
+        PasoEntity::class,
+        ProgresoEntity::class,
+        UserEntity::class,
+        ChatMessageLocalEntity::class,
+        CalificacionEntity::class
+    ],
+    version = 3,
     exportSchema = false
 )
 abstract class CleBotDatabase : RoomDatabase() {
     abstract fun tramiteDao(): TramiteDao
+    abstract fun userDao(): UserDao
+    abstract fun chatDao(): ChatDao
+    abstract fun kardexDao(): KardexDao
 
     companion object {
         @Volatile
@@ -23,7 +34,9 @@ abstract class CleBotDatabase : RoomDatabase() {
                     context.applicationContext,
                     CleBotDatabase::class.java,
                     "clebot_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // Útil durante el desarrollo
+                .build()
                 INSTANCE = instance
                 instance
             }

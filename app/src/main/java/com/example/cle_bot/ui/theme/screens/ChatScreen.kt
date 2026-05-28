@@ -70,10 +70,17 @@ fun ChatScreen(
 
     var inputText by remember { mutableStateOf("") }
     var isSending by remember { mutableStateOf(false) }
-    val messages = remember {
-        mutableStateListOf(
-            ChatMessage("¡Hola! Soy tu asistente virtual CLEbot. ¿En qué puedo ayudarte hoy?", true)
-        )
+    var isOnline by remember { mutableStateOf(true) }
+    val messages = remember { mutableStateListOf<ChatMessage>() }
+
+    // Cargar historial local al iniciar
+    LaunchedEffect(user?.id) {
+        val history = repository.getLocalChatHistory(user?.id)
+        if (history.isEmpty()) {
+            messages.add(ChatMessage("¡Hola! Soy tu asistente virtual CLEbot. ¿En qué puedo ayudarte hoy?", true))
+        } else {
+            messages.addAll(history.map { ChatMessage(it.text, it.isBot) })
+        }
     }
 
     // Auto-scroll al final cuando hay mensajes nuevos
@@ -94,6 +101,7 @@ fun ChatScreen(
             isSending = true
             when (val result = repository.sendChatMessage(user?.id, message)) {
                 is ApiResult.Success -> {
+                    isOnline = result.data.message != "Offline"
                     messages.add(
                         ChatMessage(
                             result.data.botReply ?: "No pude generar una respuesta en este momento.",
@@ -101,7 +109,10 @@ fun ChatScreen(
                         )
                     )
                 }
-                is ApiResult.Error -> messages.add(ChatMessage(result.message, true))
+                is ApiResult.Error -> {
+                    isOnline = false
+                    messages.add(ChatMessage(result.message, true))
+                }
             }
             isSending = false
         }
@@ -122,7 +133,10 @@ fun ChatScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.78f)) {
+            ModalDrawerSheet(
+                modifier = Modifier.fillMaxWidth(0.78f),
+                drawerContainerColor = Color.Black
+            ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -134,16 +148,20 @@ fun ChatScreen(
                     )
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("CLEbot", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text("En línea", color = Color(0xFF4CAF50), fontSize = 12.sp)
+                        Text("CLEbot", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Text(
+                            if (isOnline) "En línea" else "Fuera de línea",
+                            color = if (isOnline) Color(0xFF4CAF50) else Color.Gray,
+                            fontSize = 12.sp
+                        )
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { scope.launch { drawerState.close() } }) {
-                        Icon(Icons.Default.Close, null)
+                        Icon(Icons.Default.Close, null, tint = Color.White)
                     }
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(color = Color.DarkGray)
                 Spacer(Modifier.height(8.dp))
 
                 listOf(
@@ -158,15 +176,19 @@ fun ChatScreen(
                 ).forEach { (icon, label, action) ->
                     NavigationDrawerItem(
                         icon = { Icon(icon, null, tint = blue) },
-                        label = { Text(label) },
+                        label = { Text(label, color = Color.White, fontWeight = FontWeight.Medium) },
                         selected = false,
                         onClick = { action() },
-                        modifier = Modifier.padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent,
+                            selectedContainerColor = Color.DarkGray
+                        )
                     )
                 }
 
                 Spacer(Modifier.weight(1f))
-                HorizontalDivider()
+                HorizontalDivider(color = Color.DarkGray)
 
                 // Footer del drawer
                 Row(
@@ -174,19 +196,20 @@ fun ChatScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        Modifier.size(40.dp).background(Color.Gray, CircleShape),
+                        Modifier.size(40.dp).background(Color.DarkGray, CircleShape),
                         contentAlignment = Alignment.Center
                     ) { Text(avatarInitial, color = Color.White, fontWeight = FontWeight.Bold) }
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text(displayName, fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                        Text(displayEmail, fontSize = 11.sp, color = Color.Gray)
+                        Text(displayName, fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color.White)
+                        Text(displayEmail, fontSize = 11.sp, color = Color.LightGray)
                     }
                 }
             }
         }
     ) {
         Scaffold(
+            containerColor = Color.Black,
             topBar = {
                 TopAppBar(
                     title = {
@@ -198,25 +221,34 @@ fun ChatScreen(
                             )
                             Spacer(Modifier.width(10.dp))
                             Column {
-                                Text("CLEbot", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text("En línea", color = Color(0xFF4CAF50), fontSize = 12.sp)
+                                Text("CLEbot", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                Text(
+                                    if (isOnline) "En línea" else "Fuera de línea",
+                                    color = if (isOnline) Color(0xFF4CAF50) else Color.Gray,
+                                    fontSize = 12.sp
+                                )
                             }
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, null)
+                            Icon(Icons.Default.Menu, null, tint = Color.White)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
                 )
             },
             bottomBar = {
-                Surface(shadowElevation = 8.dp) {
+                Surface(
+                    color = Color.Black,
+                    shadowElevation = 8.dp
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .navigationBarsPadding()
+                            .imePadding()
+                            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         CompositionLocalProvider(LocalTextToolbar provides emptyTextToolbar) {
@@ -224,7 +256,7 @@ fun ChatScreen(
                                 value = inputText,
                                 onValueChange = { inputText = it },
                                 modifier = Modifier.weight(1f),
-                                placeholder = { Text("Escribe aquí....") },
+                                placeholder = { Text("Escribe aquí....", color = Color.Gray) },
                                 shape = RoundedCornerShape(24.dp),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
@@ -235,6 +267,15 @@ fun ChatScreen(
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onSend = { sendMessage(inputText) }
+                                ),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color(0xFF1A1A1A),
+                                    unfocusedContainerColor = Color(0xFF1A1A1A),
+                                    focusedBorderColor = blue,
+                                    unfocusedBorderColor = Color.DarkGray,
+                                    cursorColor = blue
                                 )
                             )
                         }
@@ -252,7 +293,7 @@ fun ChatScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFF2F3F8))
+                    .background(Color.Black)
                     .padding(paddingValues)
             ) {
                 // El LazyColumn ahora solo contiene los mensajes, no los botones rápidos
@@ -278,7 +319,7 @@ fun ChatScreen(
                 // Contenedor fijo para las opciones/acciones rápidas
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = Color.White,
+                    color = Color.Black,
                     shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                     shadowElevation = 4.dp
                 ) {
@@ -289,7 +330,8 @@ fun ChatScreen(
                         Text(
                             "¿Qué trámite necesitas realizar?",
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = Color.White
                         )
                         
                         // Grid de acciones rápidas (2 filas x 3 columnas para que sea más compacto)
@@ -302,9 +344,11 @@ fun ChatScreen(
                                     Card(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .height(70.dp),
+                                            .height(85.dp),
                                         shape = RoundedCornerShape(12.dp),
-                                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FF)),
+                                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+                                        elevation = CardDefaults.cardElevation(2.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.DarkGray),
                                         onClick = { sendMessage(action.label) }
                                     ) {
                                         Column(
@@ -312,9 +356,19 @@ fun ChatScreen(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.Center
                                         ) {
-                                            Icon(action.icon, null, tint = blue, modifier = Modifier.size(20.dp))
-                                            Spacer(Modifier.height(4.dp))
-                                            Text(action.label, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+                                            Icon(
+                                                action.icon,
+                                                null,
+                                                tint = blue,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Spacer(Modifier.height(6.dp))
+                                            Text(
+                                                action.label,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
                                         }
                                     }
                                 }
@@ -338,7 +392,7 @@ fun ChatBubble(message: ChatMessage) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(blue.copy(alpha = 0.1f), CircleShape),
+                    .background(blue.copy(alpha = 0.2f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -352,7 +406,7 @@ fun ChatBubble(message: ChatMessage) {
 
         Column(horizontalAlignment = if (message.isBot) Alignment.Start else Alignment.End) {
             Surface(
-                color = if (message.isBot) Color.White else blue,
+                color = if (message.isBot) Color(0xFF262626) else blue,
                 shape = RoundedCornerShape(
                     topStart = 16.dp, topEnd = 16.dp,
                     bottomEnd = if (message.isBot) 16.dp else 4.dp,
@@ -363,7 +417,7 @@ fun ChatBubble(message: ChatMessage) {
                 Text(
                     message.text,
                     modifier = Modifier.padding(12.dp),
-                    color = if (message.isBot) Color.Black else Color.White,
+                    color = Color.White,
                     fontSize = 14.sp
                 )
             }

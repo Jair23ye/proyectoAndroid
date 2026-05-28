@@ -36,3 +36,33 @@ data class ProgresoEntity(
     val isCompleted: Boolean,
     val isSynced: Boolean = false
 )
+
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val controlNumber: String?,
+    val email: String,
+    val password: String // En una app real, esto debería estar hasheado
+)
+
+@Entity(tableName = "chat_messages")
+data class ChatMessageLocalEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val userId: Int?,
+    val text: String,
+    val isBot: Boolean,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "calificaciones")
+data class CalificacionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val userId: Int,
+    val periodo: String,
+    val clave: String,
+    val materia: String,
+    val creditos: Int,
+    val calificacion: String,
+    val evaluacion: String
+)
